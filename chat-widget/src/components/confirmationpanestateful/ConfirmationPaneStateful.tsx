@@ -68,7 +68,8 @@ export const ConfirmationPaneStateful = (props: IConfirmationPaneStatefulParams)
                 setFocusOnSendBox();
             }
             setTabIndices(elements, initialTabIndexMap, true);
-        }
+        },
+        ...props?.controlProps
     };
 
     // Move focus to the first button
