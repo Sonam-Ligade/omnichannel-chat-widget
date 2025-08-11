@@ -401,6 +401,25 @@ export const LiveChatWidgetStateful = (props: ILiveChatWidgetProps) => {
                 return;
             }
 
+            // Prevent start chat while end chat or post-chat is in progress to avoid race conditions
+            const inMemState = executeReducer(state, { type: LiveChatWidgetActionType.GET_IN_MEMORY_STATE, payload: null });
+            const isPersistent = isPersistentEnabled(props.chatConfig);
+
+            // Check if end chat or post-chat is in progress
+            if (inMemState?.appStates?.conversationEndedBy !== ConversationEndEntity.NotSet || 
+            inMemState?.appStates?.conversationState === ConversationState.PostchatLoading ||
+            inMemState?.appStates?.conversationState === ConversationState.Postchat ||
+            (!isPersistent && inMemState?.appStates?.conversationState === ConversationState.InActive)) {
+
+                TelemetryHelper.logSDKEvent(LogLevel.INFO, {
+                    Event: TelemetryEvent.StartChatEventReceived,
+                    Description: `StartChat ignored: ${inMemState?.appStates?.conversationState === ConversationState.Postchat ? "post-chat survey in progress" :
+                         inMemState?.appStates?.conversationState === ConversationState.PostchatLoading ? "post-chat loading" :
+                         "end chat is in progress."}.`
+                });
+                return;
+            }
+
             if (msg?.payload?.customContext) {
                 TelemetryHelper.logActionEventToAllTelemetry(LogLevel.INFO, {
                     Event: TelemetryEvent.CustomContextReceived,
@@ -494,12 +513,12 @@ export const LiveChatWidgetStateful = (props: ILiveChatWidgetProps) => {
         });
 
         // Ensure confirmation pane is dismissed when auto-close is executed
-        BroadcastService.getMessageByEventName(BroadcastEvent.CloseChat).subscribe(() => {
-            // Release any active confirmation overlay if present
-            if (state?.uiStates?.showConfirmationPane) {
-                dispatch({ type: LiveChatWidgetActionType.SET_SHOW_CONFIRMATION, payload: false });
-            }
-        });
+        // BroadcastService.getMessageByEventName(BroadcastEvent.CloseChat).subscribe(() => {
+        //     // Release any active confirmation overlay if present
+        //     if (state?.uiStates?.showConfirmationPane) {
+        //         dispatch({ type: LiveChatWidgetActionType.SET_SHOW_CONFIRMATION, payload: false });
+        //     }
+        // });
 
         // End chat on browser unload
         BroadcastService.getMessageByEventName(BroadcastEvent.InitiateEndChatOnBrowserUnload).subscribe(() => {

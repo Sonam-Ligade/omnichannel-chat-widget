@@ -245,7 +245,7 @@ export const endChatStateCleanUp = (dispatch: Dispatch<ILiveChatWidgetAction>) =
 
 export const closeChatStateCleanUp = (dispatch: Dispatch<ILiveChatWidgetAction>) => {
     dispatch({ type: LiveChatWidgetActionType.SET_CHAT_TOKEN, payload: undefined });
-    dispatch({ type: LiveChatWidgetActionType.SET_CONVERSATION_STATE, payload: ConversationState.Closed });
+    // dispatch({ type: LiveChatWidgetActionType.SET_CONVERSATION_STATE, payload: ConversationState.Closed });
     dispatch({ type: LiveChatWidgetActionType.SET_CONVERSATIONAL_SURVEY_DISPLAY, payload: false });
     dispatch({ type: LiveChatWidgetActionType.SET_RECONNECT_ID, payload: undefined });
     dispatch({ type: LiveChatWidgetActionType.SET_AUDIO_NOTIFICATION, payload: null });
@@ -303,6 +303,8 @@ export const endVoiceVideoCallIfOngoing = async (facadeChatSDK: FacadeChatSDK, d
 
 const closeChatWidget = (dispatch: Dispatch<ILiveChatWidgetAction>) => {
     // Embedded chat
+    // Dismiss confirmation pane before setting final Closed state
+    dispatch({ type: LiveChatWidgetActionType.SET_SHOW_CONFIRMATION, payload: false });
     dispatch({ type: LiveChatWidgetActionType.SET_CONVERSATION_STATE, payload: ConversationState.Closed });
 };
 
