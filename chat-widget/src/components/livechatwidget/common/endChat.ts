@@ -25,6 +25,15 @@ const prepareEndChat = async (props: ILiveChatWidgetProps, facadeChatSDK: Facade
     try {
         const { chatConfig } = props;
 
+        // Prevent prepareEndChat while start chat is in progress to avoid race conditions
+        const inMemoryState = executeReducer(state, { type: LiveChatWidgetActionType.GET_IN_MEMORY_STATE, payload: null });
+        if (inMemoryState?.appStates?.conversationState === ConversationState.Loading && !inMemoryState?.appStates?.startChatFailed) {
+            TelemetryHelper.logSDKEvent(LogLevel.INFO, {
+                Event: TelemetryEvent.PrepareEndChat,
+                Description: "prepareEndChat ignored: start chat is in progress."
+            });
+            return;
+        }
         // Use Case: If call is ongoing, end the call by simulating end call button click
         endVoiceVideoCallIfOngoing(facadeChatSDK, dispatch);
 
@@ -42,7 +51,7 @@ const prepareEndChat = async (props: ILiveChatWidgetProps, facadeChatSDK: Facade
             }
 
             // Use Case: If ended by Agent, stay chat in InActive state
-            let isConversationalSurveyEnabled = state.appStates.isConversationalSurveyEnabled;
+            const isConversationalSurveyEnabled = state.appStates.isConversationalSurveyEnabled;
             if (isConversationalSurveyEnabled && (state?.appStates?.conversationEndedBy === ConversationEndEntity.Agent ||
                 state?.appStates?.conversationEndedBy === ConversationEndEntity.Bot)) {
                 dispatch({ type: LiveChatWidgetActionType.SET_CONVERSATION_STATE, payload: ConversationState.InActive });
@@ -135,9 +144,18 @@ const prepareEndChat = async (props: ILiveChatWidgetProps, facadeChatSDK: Facade
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const endChat = async (props: ILiveChatWidgetProps, facadeChatSDK: any, state: ILiveChatWidgetContext, dispatch: Dispatch<ILiveChatWidgetAction>, setAdapter: any, setWebChatStyles: any, adapter: any,
     skipEndChatSDK?: boolean, skipCloseChat?: boolean, postMessageToOtherTab?: boolean) => {
+ 
+    const inMemoryState = executeReducer(state, { type: LiveChatWidgetActionType.GET_IN_MEMORY_STATE, payload: null });
+    // Prevent closing while start chat is in progress to avoid race conditions
+    if (inMemoryState?.appStates?.conversationState === ConversationState.Loading && !inMemoryState?.appStates?.startChatFailed) {
+        TelemetryHelper.logSDKEvent(LogLevel.INFO, {
+            Event: TelemetryEvent.PrepareEndChat,
+            Description: "endChat ignored: start chat is in progress."
+        });
+        return;
+    }
 
     if (!skipEndChatSDK && facadeChatSDK?.getChatSDK()?.conversation) {
-        const inMemoryState = executeReducer(state, { type: LiveChatWidgetActionType.GET_IN_MEMORY_STATE, payload: null });
         const endChatOptionalParameters : EndChatOptionalParams = {
             isSessionEnded : inMemoryState?.appStates?.chatDisconnectEventReceived
         };
@@ -227,7 +245,7 @@ export const endChatStateCleanUp = (dispatch: Dispatch<ILiveChatWidgetAction>) =
 
 export const closeChatStateCleanUp = (dispatch: Dispatch<ILiveChatWidgetAction>) => {
     dispatch({ type: LiveChatWidgetActionType.SET_CHAT_TOKEN, payload: undefined });
-    // dispatch({ type: LiveChatWidgetActionType.SET_CONVERSATION_STATE, payload: ConversationState.Closed });
+    dispatch({ type: LiveChatWidgetActionType.SET_CONVERSATION_STATE, payload: ConversationState.Closed });
     dispatch({ type: LiveChatWidgetActionType.SET_CONVERSATIONAL_SURVEY_DISPLAY, payload: false });
     dispatch({ type: LiveChatWidgetActionType.SET_RECONNECT_ID, payload: undefined });
     dispatch({ type: LiveChatWidgetActionType.SET_AUDIO_NOTIFICATION, payload: null });

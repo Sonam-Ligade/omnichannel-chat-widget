@@ -119,23 +119,25 @@ function ConfirmationPane(props: IConfirmationPaneProps) {
                         className={props.styleProps?.classNames?.buttonGroupClassName}
                         styles={buttonGroupStyles}
                         id={elementId + "-buttongroup"}>
-                        {!props.controlProps?.hideConfirmButton && (decodeComponentString(props.componentOverrides?.confirmButton) ||
+            {!props.controlProps?.hideConfirmButton && (decodeComponentString(props.componentOverrides?.confirmButton) ||
                             <PrimaryButton
                                 className={props.styleProps?.classNames?.confirmButtonClassName}
                                 styles={confirmButtonStyles}
                                 text={props.controlProps?.confirmButtonText || defaultConfirmationPaneControlProps.confirmButtonText}
                                 onClick={handleConfirmClick}
                                 id={elementId + "-confirmbutton"}
+                                disabled={props.controlProps?.confirmButtonDisabled}
                                 ariaLabel={props.controlProps?.confirmButtonAriaLabel || defaultConfirmationPaneControlProps.confirmButtonAriaLabel}
                             />)}
 
-                        {!props.controlProps?.hideCancelButton && (decodeComponentString(props.componentOverrides?.cancelButton) ||
+            {!props.controlProps?.hideCancelButton && (decodeComponentString(props.componentOverrides?.cancelButton) ||
                             <DefaultButton
                                 className={props.styleProps?.classNames?.cancelButtonClassName}
                                 styles={cancelButtonStyles}
                                 text={props.controlProps?.cancelButtonText || defaultConfirmationPaneControlProps.cancelButtonText}
                                 onClick={handleCancelClick}
                                 id={elementId + "-cancelbutton"}
+                                disabled={props.controlProps?.cancelButtonDisabled}
                                 ariaLabel={props.controlProps?.cancelButtonAriaLabel || defaultConfirmationPaneControlProps.cancelButtonAriaLabel}
                             />)}
                     </Stack>

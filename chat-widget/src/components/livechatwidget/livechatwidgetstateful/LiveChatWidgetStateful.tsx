@@ -457,6 +457,16 @@ export const LiveChatWidgetStateful = (props: ILiveChatWidgetProps) => {
                 Description: "Received InitiateEndChat BroadcastEvent."
             });
 
+            // If start chat is in progress, ignore end chat to avoid race conditions
+            const inMemoryStateForEnd = executeReducer(state, { type: LiveChatWidgetActionType.GET_IN_MEMORY_STATE, payload: null });
+            if (inMemoryStateForEnd?.appStates?.conversationState === ConversationState.Loading && !inMemoryStateForEnd?.appStates?.startChatFailed) {
+                TelemetryHelper.logSDKEvent(LogLevel.INFO, {
+                    Event: TelemetryEvent.PrepareEndChat,
+                    Description: "Ignored InitiateEndChat: start chat is in progress."
+                });
+                return;
+            }
+
             // This is to ensure to get latest state from cache in multitab
             const persistedState = getStateFromCache(getWidgetCacheIdfromProps(props));
 
@@ -483,6 +493,14 @@ export const LiveChatWidgetStateful = (props: ILiveChatWidgetProps) => {
             });
         });
 
+        // Ensure confirmation pane is dismissed when auto-close is executed
+        BroadcastService.getMessageByEventName(BroadcastEvent.CloseChat).subscribe(() => {
+            // Release any active confirmation overlay if present
+            if (state?.uiStates?.showConfirmationPane) {
+                dispatch({ type: LiveChatWidgetActionType.SET_SHOW_CONFIRMATION, payload: false });
+            }
+        });
+
         // End chat on browser unload
         BroadcastService.getMessageByEventName(BroadcastEvent.InitiateEndChatOnBrowserUnload).subscribe(() => {
             initiateEndChatOnBrowserUnload();
@@ -496,6 +514,17 @@ export const LiveChatWidgetStateful = (props: ILiveChatWidgetProps) => {
 
         BroadcastService.getMessageByEventName(endChatEventName).subscribe((msg: ICustomEvent) => {
             if (msg?.payload?.runtimeId !== TelemetryManager.InternalTelemetryData.lcwRuntimeId) {
+
+                // If start chat is in progress, ignore end chat from other tabs to avoid race conditions
+                const inMemoryStateForCrossTabEnd = executeReducer(state, { type: LiveChatWidgetActionType.GET_IN_MEMORY_STATE, payload: null });
+                if (inMemoryStateForCrossTabEnd?.appStates?.conversationState === ConversationState.Loading && !inMemoryStateForCrossTabEnd?.appStates?.startChatFailed) {
+                    TelemetryHelper.logSDKEvent(LogLevel.INFO, {
+                        Event: TelemetryEvent.PrepareEndChat,
+                        Description: "Ignored EndChat from other tab: start chat is in progress."
+                    });
+                    return;
+                }
+
                 TelemetryHelper.logSDKEvent(LogLevel.INFO, {
                     Event: TelemetryEvent.PrepareEndChat,
                     Description: "Received EndChat BroadcastEvent from other tabs. Closing this chat."
@@ -650,8 +679,7 @@ export const LiveChatWidgetStateful = (props: ILiveChatWidgetProps) => {
             return;
         }
 
-        const inMemoryState = executeReducer(state, { type: LiveChatWidgetActionType.GET_IN_MEMORY_STATE, payload: null });
-        let isConversationalSurveyEnabled = state.appStates.isConversationalSurveyEnabled;
+        const isConversationalSurveyEnabled = state.appStates.isConversationalSurveyEnabled;
 
         // In conversational survey, we need to check post chat survey logics before we set ConversationState to InActive
         // Hence setting ConversationState to InActive will be done later in the post chat flows
