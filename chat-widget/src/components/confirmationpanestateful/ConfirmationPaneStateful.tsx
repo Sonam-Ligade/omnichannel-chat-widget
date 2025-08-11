@@ -90,7 +90,7 @@ export const ConfirmationPaneStateful = (props: IConfirmationPaneStatefulParams)
         });
     }, []);
 
-    // Auto-close only AFTER user confirmed (Ok) and conversation state transitions away from Active/Loading
+    // Auto-close only AFTER user confirmed (Ok) and end chat fully completed
     // This ensures endChat completes before allowing new interactions
     useEffect(() => {
         if (!state?.uiStates?.showConfirmationPane) {
