@@ -71,6 +71,7 @@ import { StartChatFailureType } from "../../../contexts/common/StartChatFailureT
 import StartChatOptionalParams from "@microsoft/omnichannel-chat-sdk/lib/core/StartChatOptionalParams";
 import { TelemetryHelper } from "../../../common/telemetry/TelemetryHelper";
 import WebChatContainerStateful from "../../webchatcontainerstateful/WebChatContainerStateful";
+import { AIFluentSendboxStateful } from "../../chatinput/AIFluentSendboxStateful";
 import createDownloadTranscriptProps from "../common/createDownloadTranscriptProps";
 import { createFooter } from "../common/createFooter";
 import { createInternetConnectionChangeHandler } from "../common/createInternetConnectionChangeHandler";
@@ -91,6 +92,7 @@ import useChatAdapterStore from "../../../hooks/useChatAdapterStore";
 import useChatContextStore from "../../../hooks/useChatContextStore";
 import useFacadeSDKStore from "../../../hooks/useFacadeChatSDKStore";
 import { customEventCallback, subscribeToSendCustomEvent } from "../common/customEventHandler";
+// import FluentChatInputStateful from "../../chatinput/FluentChatInputStateful";
 
 let uiTimer : ITimer;
 
@@ -650,8 +652,7 @@ export const LiveChatWidgetStateful = (props: ILiveChatWidgetProps) => {
             return;
         }
 
-        const inMemoryState = executeReducer(state, { type: LiveChatWidgetActionType.GET_IN_MEMORY_STATE, payload: null });
-        let isConversationalSurveyEnabled = state.appStates.isConversationalSurveyEnabled;
+        const isConversationalSurveyEnabled = state.appStates.isConversationalSurveyEnabled;
 
         // In conversational survey, we need to check post chat survey logics before we set ConversationState to InActive
         // Hence setting ConversationState to InActive will be done later in the post chat flows
@@ -868,6 +869,12 @@ export const LiveChatWidgetStateful = (props: ILiveChatWidgetProps) => {
 
                         {!livechatProps.controlProps?.hideWebChatContainer && shouldShowWebChatContainer(state) && (decodeComponentString(livechatProps.componentOverrides?.webChatContainer) || <WebChatContainerStateful {...livechatProps} />)}
 
+                        {/* Render the Fluent sendbox inside the Composer so it shares Web Chat's provider/store
+                            This keeps UI-only change and preserves Web Chat hooks used by the sendbox. */}
+                        {!livechatProps.controlProps?.hideWebChatContainer && shouldShowWebChatContainer(state) && (decodeComponentString(livechatProps.componentOverrides?.webChatContainer) ? null : <AIFluentSendboxStateful />)}
+
+                        {/* {!livechatProps.controlProps?.hideWebChatContainer && shouldShowWebChatContainer(state) && (decodeComponentString(livechatProps.componentOverrides?.webChatContainer) || <FluentChatInputStateful {...livechatProps} />)} */}
+                        
                         {!livechatProps.controlProps?.hideConfirmationPane && shouldShowConfirmationPane(state) && (decodeComponentString(livechatProps.componentOverrides?.confirmationPane) || <ConfirmationPaneStateful {...confirmationPaneProps} setPostChatContext={setPostChatContextRelay} prepareEndChat={prepareEndChatRelay} />)}
 
                         {!livechatProps.controlProps?.hidePostChatLoadingPane && shouldShowPostChatLoadingPane(state) && (decodeComponentString(livechatProps.componentOverrides?.postChatLoadingPane) || <PostChatLoadingPaneStateful {...livechatProps.postChatLoadingPaneProps} />)}

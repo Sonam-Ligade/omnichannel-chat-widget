@@ -17,7 +17,7 @@ export const defaultWebChatStyles: StyleOptions = {
     bubbleMinHeight: 34,
     bubbleMinWidth: 20,
     bubbleTextColor: "White",
-    hideSendBox: false,
+    hideSendBox: true,
     hideUploadButton: true,
     primaryFont: "Segoe UI, Arial, sans-serif",
     rootHeight: "100%",
