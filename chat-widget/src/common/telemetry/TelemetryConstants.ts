@@ -227,6 +227,9 @@ export enum TelemetryEvent {
     CustomContextReceived = "CustomContextReceived",
     CustomEventAction = "CustomEventAction",
 
+    CSATAnalysisCompleted = "CSATAnalysisCompleted",
+    CSATAnalysisFailed = "CSATAnalysisFailed",
+    
     // Internet connection
     NetworkDisconnected = "NetworkDisconnected",
     NetworkReconnected = "NetworkReconnected",

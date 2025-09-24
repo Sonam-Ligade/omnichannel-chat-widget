@@ -20,6 +20,8 @@ import { defaultWebChatContainerStatefulProps } from "../../webchatcontainerstat
 import { executeReducer } from "../../../contexts/createReducer";
 import { isPersistentEnabled } from "./reconnectChatHelper";
 import { uuidv4 } from "@microsoft/omnichannel-chat-sdk";
+// import { SentimentAnalyticsService } from "../../../services/SentimentAnalyticsService";
+import { SentimentAnalysisService } from "../../../services/SentimentAnalysisService";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const prepareEndChat = async (props: ILiveChatWidgetProps, facadeChatSDK: FacadeChatSDK, state: ILiveChatWidgetContext, dispatch: Dispatch<ILiveChatWidgetAction>, setAdapter: any, setWebChatStyles: any, adapter: any) => {
@@ -44,7 +46,7 @@ const prepareEndChat = async (props: ILiveChatWidgetProps, facadeChatSDK: Facade
             }
 
             // Use Case: If ended by Agent, stay chat in InActive state
-            let isConversationalSurveyEnabled = state.appStates.isConversationalSurveyEnabled;
+            const isConversationalSurveyEnabled = state.appStates.isConversationalSurveyEnabled;
             if (isConversationalSurveyEnabled && (state?.appStates?.conversationEndedBy === ConversationEndEntity.Agent ||
                 state?.appStates?.conversationEndedBy === ConversationEndEntity.Bot)) {
                 dispatch({ type: LiveChatWidgetActionType.SET_CONVERSATION_STATE, payload: ConversationState.InActive });
@@ -148,6 +150,11 @@ const endChat = async (props: ILiveChatWidgetProps, facadeChatSDK: any, state: I
             TelemetryHelper.logSDKEvent(LogLevel.INFO, {
                 Event: TelemetryEvent.EndChatSDKCall
             });
+
+            // Perform sentiment analysis for CSAT 
+            SentimentAnalysisService.analyzeSentiments(facadeChatSDK);
+            // SentimentAnalyticsService.analyzeSentiments(facadeChatSDK);
+            
             await facadeChatSDK?.endChat(endChatOptionalParameters);
         } catch (ex) {
 
