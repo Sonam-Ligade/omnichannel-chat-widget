@@ -63,6 +63,7 @@ function ChatInputAttachments(props: IChatInputAttachmentProps) {
                     aria-label={overflowMenuAriaLabel}
                 />
             }
+            data-tabster='{"deloser": {}}'
             {...restProps}
         >
             {attachmentPreviewItems.map(({ id, text, progress }) => (
@@ -72,6 +73,7 @@ function ChatInputAttachments(props: IChatInputAttachmentProps) {
                     media={getFileIcon(text)}
                     {...attachmentProps}
                     {...(progress !== undefined && { progress: { value: progress } })}
+                    dismissButton={{ tabIndex: 0 }}
                 >
                     {text}
                 </Attachment>

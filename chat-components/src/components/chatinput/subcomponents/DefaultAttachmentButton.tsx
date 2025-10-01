@@ -54,7 +54,7 @@ export const renderDefaultAttachmentButton = (props: IDefaultAttachmentButtonPro
         <Button
             className="fai-ChatInput__attachmentButton"
             appearance="transparent"
-            shape="circular"
+            shape="square"
             icon={icon}
             aria-label={ariaLabel}
             disabled={disabled}

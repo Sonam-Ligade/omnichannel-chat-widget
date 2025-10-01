@@ -26,6 +26,10 @@ export const defaultChatInputControlProps: IChatInputControlProps = {
     // === Theme ===
     theme: webLightTheme,
 
-    hideSendBox: false
+    hideSendBox: false,
+
+    sendButtonProps: {
+        shape: "square"
+    }
 
 };

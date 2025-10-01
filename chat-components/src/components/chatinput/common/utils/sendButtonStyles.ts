@@ -53,49 +53,70 @@ export const createChatInputSendButtonStyle = (styleProps: IChatInputStyleProps)
     const inset = toPx(sendBoxButtonShadeInset) ?? "0px";
     let css = "";
 
-    // Base
-    // Border radius behavior:
-    // - If caller supplies sendBoxButtonShadeBorderRadius, use that exact value.
-    // - Otherwise inherit the outer button's radius so circular buttons don't show a squared inner background.
+    // Handle background colors and shades (separate from icon colors)
     const baseExtra = sendBoxButtonShadeBorderRadius !== undefined
         ? ` border-radius: ${toPx(sendBoxButtonShadeBorderRadius)} !important;`
         : " border-radius: inherit !important;";
     css += ruleWithFillAndShade(
         ".fai-SendButton .fai-SendButton__stopBackground",
-        sendBoxButtonColor,
+        undefined,
         sendBoxButtonShadeColor,
         inset,
         baseExtra
     );
 
-    // Disabled > Active > Hover > Focus (same priority model as Web Chat)
+    // Disabled > Active > Hover > Focus
     css += ruleWithFillAndShade(
         ".fai-SendButton:disabled .fai-SendButton__stopBackground, .fai-SendButton[aria-disabled=\"true\"] .fai-SendButton__stopBackground",
-        sendBoxButtonColorOnDisabled,
+        undefined,
         sendBoxButtonShadeColorOnDisabled,
         inset
     );
 
     css += ruleWithFillAndShade(
         ".fai-SendButton:not(:disabled):not([aria-disabled=\"true\"]):active .fai-SendButton__stopBackground",
-        sendBoxButtonColorOnActive,
+        undefined,
         sendBoxButtonShadeColorOnActive,
         inset
     );
 
     css += ruleWithFillAndShade(
         ".fai-SendButton:not(:disabled):not([aria-disabled=\"true\"]):not(:active):hover .fai-SendButton__stopBackground",
-        sendBoxButtonColorOnHover,
+        undefined,
         sendBoxButtonShadeColorOnHover,
         inset
     );
 
     css += ruleWithFillAndShade(
-        ".fai-SendButton:not(:disabled):not([aria-disabled=\"true\"]):not(:active):not(:hover):focus .fai-SendButton__stopBackground",
-        sendBoxButtonColorOnFocus,
+        ".fai-SendButton:not(:disabled):not([aria-disabled=\"true\"]):focus .fai-SendButton__stopBackground, .fai-SendButton[data-fui-focus-visible] .fai-SendButton__stopBackground, .fai-SendButton:focus .fai-SendButton__stopBackground",
+        undefined,
         sendBoxButtonShadeColorOnFocus,
         inset
     );
+
+    // Apply send button icon colors
+    if (sendBoxButtonColor) {
+        css += `.fai-SendButton svg, .fai-SendButton svg path, .fai-SendButton .fai-SendButton__sendIcon svg, .fai-SendButton .fai-SendButton__sendIcon svg path { fill: ${sendBoxButtonColor} !important; }\n`;
+    }
+    
+    if (sendBoxButtonColorOnDisabled) {
+        css += `.fai-SendButton:disabled svg, .fai-SendButton[aria-disabled="true"] svg, .fai-SendButton:disabled svg path, .fai-SendButton[aria-disabled="true"] svg path, .fai-SendButton:disabled .fai-SendButton__sendIcon svg, .fai-SendButton[aria-disabled="true"] .fai-SendButton__sendIcon svg, .fai-SendButton:disabled .fai-SendButton__sendIcon svg path, .fai-SendButton[aria-disabled="true"] .fai-SendButton__sendIcon svg path { fill: ${sendBoxButtonColorOnDisabled} !important; }\n`;
+    }
+    
+    if (sendBoxButtonColorOnActive) {
+        css += `.fai-SendButton:not(:disabled):not([aria-disabled="true"]):active svg, .fai-SendButton:not(:disabled):not([aria-disabled="true"]):active svg path, .fai-SendButton:not(:disabled):not([aria-disabled="true"]):active .fai-SendButton__sendIcon svg, .fai-SendButton:not(:disabled):not([aria-disabled="true"]):active .fai-SendButton__sendIcon svg path { fill: ${sendBoxButtonColorOnActive} !important; }\n`;
+    }
+    
+    // Default background on hover
+    css += ".fai-SendButton:not(:disabled):not([aria-disabled=\"true\"]):not(:active):hover { background-color: #f3f2f1 !important; }\n";
+    
+    if (sendBoxButtonColorOnHover) {
+        css += `.fai-SendButton:not(:disabled):not([aria-disabled="true"]):not(:active):hover svg, .fai-SendButton:not(:disabled):not([aria-disabled="true"]):not(:active):hover svg path, .fai-SendButton:not(:disabled):not([aria-disabled="true"]):not(:active):hover .fai-SendButton__sendIcon svg, .fai-SendButton:not(:disabled):not([aria-disabled="true"]):not(:active):hover .fai-SendButton__sendIcon svg path { fill: ${sendBoxButtonColorOnHover} !important; }\n`;
+    }
+    
+    if (sendBoxButtonColorOnFocus) {
+        css += `.fai-SendButton:not(:disabled):not([aria-disabled="true"]):focus svg, .fai-SendButton[data-fui-focus-visible] svg, .fai-SendButton:not(:disabled):not([aria-disabled="true"]):focus svg path, .fai-SendButton[data-fui-focus-visible] svg path, .fai-SendButton:not(:disabled):not([aria-disabled="true"]):focus .fai-SendButton__sendIcon svg, .fai-SendButton[data-fui-focus-visible] .fai-SendButton__sendIcon svg, .fai-SendButton:not(:disabled):not([aria-disabled="true"]):focus .fai-SendButton__sendIcon svg path, .fai-SendButton[data-fui-focus-visible] .fai-SendButton__sendIcon svg path { fill: ${sendBoxButtonColorOnFocus} !important; }\n`;
+    }
 
     // Keyboard focus indicator
     if (
@@ -117,15 +138,15 @@ export const createChatInputSendButtonStyle = (styleProps: IChatInputStyleProps)
         }
        
         css += ruleWithFillAndShade(
-            ".fai-SendButton:focus-visible .fai-SendButton__stopBackground, .fai-SendButton:not(:active):not(:hover):focus .fai-SendButton__stopBackground",
+            ".fai-SendButton[data-fui-focus-visible], .fai-SendButton:not(:active):not(:hover):focus",
             undefined,
             undefined,
             inset,
             extra
         );
 
-        css += ".fai-SendButton[data-fui-focus-visible], .fai-SendButton:focus-visible { outline: none !important; box-shadow: none !important; }\n";
-        css += ".fai-SendButton:focus { outline: none !important; }\n";
+        css += ".fai-SendButton[data-fui-focus-visible], .fai-SendButton:focus { outline: none !important; box-shadow: none !important; border: none !important; }\n";
+        css += ".fai-SendButton:focus-within { outline: none !important; border: none !important; box-shadow: none !important; }\n";
     }
 
     return css.trim();

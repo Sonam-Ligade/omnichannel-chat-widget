@@ -27,7 +27,7 @@ export const defaultChatInputStyleProps: IChatInputStyleProps = {
     },
 
     dragDropOverlayStyleProps: {
-        backgroundColor: "rgba(0, 123, 255, 0.1)",
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
         border: "2px dashed #007bff",
         borderRadius: "15px",
         color: "#007bff",

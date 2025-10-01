@@ -41,7 +41,6 @@ export const renderDynamicStyles = (styleProps: IChatInputStyleProps): React.Rea
         cssRules.push(sendBoxStyles);
     }
 
-
     // Generate upload/attachment button styles (reusing sendBoxButton* color props)
     const uploadButtonStyles = createChatInputUploadButtonStyles(styleProps);
     if (uploadButtonStyles) {
